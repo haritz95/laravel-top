@@ -17,3 +17,5 @@ Route::get('/', 'HomeController@index')->name('home');
 Route::get('/home', 'HomeController@index')->name('home');
 
 Route::resource('sites', 'SitesController');
+Route::get('/vote/{id}', 'SitesController@vote')->name('sites');
+Route::post('/vote/add', 'SitesController@storeVote');

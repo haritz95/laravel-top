@@ -38,7 +38,7 @@ class UpdateRank extends Command
      */
     public function handle()
     {
-        $sites = DB::table('sites')->where('status_id', '!=', 1)->orderBy('votes', 'desc')->get();
+        $sites = DB::table('sites')->where('status_id', '!=', 0)->orderBy('votes', 'desc')->get();
 
         foreach ($sites as $indexKey => $site) {
             DB::table('sites')->where('id', $site->id)->update(array('rank' => $indexKey+1));

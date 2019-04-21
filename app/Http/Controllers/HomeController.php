@@ -8,6 +8,7 @@ use DB;
 
 class HomeController extends Controller
 {
+
     /**
      * Create a new controller instance.
      *
@@ -26,7 +27,7 @@ class HomeController extends Controller
     public function index()
     {
 
-        $sites = DB::table('sites')->where('status_id', '!=', 0)->orderBy('votes','desc')->simplePaginate(15);
+        $sites = DB::table('sites')->where('status_id', 1)->orderBy('votes','desc')->simplePaginate(15);
 
         return view('sites.index', compact('sites'));
     }

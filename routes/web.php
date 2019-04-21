@@ -18,4 +18,6 @@ Route::get('/home', 'HomeController@index')->name('home');
 
 Route::resource('sites', 'SitesController');
 Route::get('/vote/{id}', 'SitesController@vote')->name('sites');
-Route::post('/vote/add', 'SitesController@storeVote');
+Route::post('/vote/add/{id}', 'SitesController@storeVote');
+Route::post('/site/store', 'SitesController@store');
+Route::post('/visit/add', 'SitesController@storeVisit')->name('visit');

@@ -15,9 +15,10 @@ class CreateSitesTable extends Migration
     {
         Schema::create('sites', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('rank');
+            $table->integer('rank')->nullable();
             $table->string('title');
             $table->string('description');
+            $table->string('tags')->nullable();
             $table->integer('category')->unsigned()->nullable();
             $table->foreign('category')->references('id')->on('categories');
             $table->string('url');

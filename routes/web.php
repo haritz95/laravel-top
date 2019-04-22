@@ -21,3 +21,6 @@ Route::get('/vote/{id}', 'SitesController@vote')->name('sites');
 Route::post('/vote/add/{id}', 'SitesController@storeVote');
 Route::post('/site/store', 'SitesController@store');
 Route::post('/visit/add', 'SitesController@storeVisit')->name('visit');
+Route::get('/dashboard', 'SitesController@dashboard')->name('dashboard');
+Route::post('/dashboard/account/password_update', 'HomeController@postCredentials');
+

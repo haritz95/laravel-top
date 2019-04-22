@@ -25,20 +25,21 @@
                     <li class="list-group-item">Last Update <b>{{ $site->updated_at }}</b></li>
                   </ul>
                 </div>
+                <div style="width:100%;" class="mt-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <b>Stadistics</b>
+                        </div>
+                        {!! $chartjs->render() !!}
+                    </div>
+            </div>
             </div>
             <div class="col-md-8">
                 <div class="card">
                     <img class="img-fluid" src="{{ URL::to('/') }}/images/header.jpg">
-                        <h3 class="m-2">{{ $site->description }}</h3>
+                        <span class="m-2">{!! $site->p_description !!}</span>
                 </div>
             </div>
-    </div>
-    <div class="row">
-        <div class="col-md-4">
-            <div style="width:100%;">
-                {!! $chartjs->render() !!}
-            </div>
-        </div>
     </div>
 </div>
 @endsection

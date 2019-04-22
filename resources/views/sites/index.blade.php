@@ -33,7 +33,7 @@
                 <div class="col-md-8 text-center">
                     <h4><a href="{{ route('sites.show', $site->id) }}" class="server-title">{{ $site->title }}</a></h4>
                     @if($site->premium === 1)
-                    <center><a href="{{ route('sites.show', $site->id) }}"><img style="width: 468; height: 60;" class="img-fluid" src="{{ $site->url_file }}">
+                    <center><a href="{{ route('sites.show', $site->id) }}"><img style="width: 468px; height: 60px;" class="img-fluid" src="{{ URL::to('/')."/".$site->url_file }}">
                     </a></center>
                     @else
                     @endif

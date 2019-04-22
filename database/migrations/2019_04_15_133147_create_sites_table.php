@@ -16,12 +16,13 @@ class CreateSitesTable extends Migration
         Schema::create('sites', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('rank')->nullable();
-            $table->string('title');
-            $table->string('description');
-            $table->string('tags')->nullable();
-            $table->integer('category')->unsigned()->nullable();
-            $table->foreign('category')->references('id')->on('categories');
-            $table->string('url');
+            $table->string('title', 100);
+            $table->string('description', 255);
+            $table->string('p_description', 2500);
+            $table->string('tags', 50)->nullable();
+            $table->integer('category_id')->unsigned()->nullable();
+            $table->foreign('category_id')->references('id')->on('categories');
+            $table->string('url', 50);
             $table->string('url_file')->nullable();
             $table->integer('user_id')->unsigned()->nullable();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');

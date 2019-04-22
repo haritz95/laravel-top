@@ -24,11 +24,11 @@ class SiteStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'title' => 'required|max:50',
-            'description' => 'required|string|max:150',
+            'title' => 'required|min:5|max:50',
+            'description' => 'required|string|min:15|max:255',
             'category' => 'required|not_in:0',
             'banner' => 'mimes:jpeg,jpg,png,gif|max:5000',
-            'website' => 'required|url'
+            'website' => 'required|url|min:8|max:100'
         ];
     }
 

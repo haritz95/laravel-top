@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Sites;
+use App\Category;
 use Illuminate\Http\Request;
 use DB;
 use Carbon;
@@ -60,8 +61,8 @@ class SitesController extends Controller
             $tags = "";
         }
         
-
         $check_site = DB::table('sites')->where('url', 'like', '%'. $parse['host'] . '%')->get();
+
         if(count($check_site)){
              return Redirect::back()->with('message', 'This Server alredy exists.');
         }else{
@@ -74,15 +75,24 @@ class SitesController extends Controller
             }else{
                 $url_file = "";   
             }
-            $inserted = DB::table('sites')
+
+            /*------ THIS I WILL USE IT WHEN THE SITE IS ACTIVATED. IT WILL AUTOMATICALLY GET A RANK --------*/
+            /*$rank = DB::table('sites')->select('rank')->orderBy('votes', 'asc')->orderBy('created_at', 'asc')->where('status_id', 1)->first();
+            if(!$rank->rank){
+                $rank = 1;
+            }*/
+
+            $data = DB::table('sites')
                     ->insert([
                         'title' => request('title'),
                         'description' => request('description'),
+                        'p_description' => request('p_description'),
                         'url' => request('website'),
-                        'category' => request('category'),
+                        'category_id' => request('category'),
                         'tags' => $tags,
                         'status_id' => 3,
                         'votes' => 0,
+                        //'rank' => $rank->rank+1,
                         'user_id' => $user->id,
                         'url_file' => $url_file,
                         'created_at' => Carbon\Carbon::now(),
@@ -143,9 +153,13 @@ class SitesController extends Controller
      * @param  \App\Sites  $sites
      * @return \Illuminate\Http\Response
      */
-    public function edit(Sites $sites)
+    public function edit($id)
     {
-        //
+        $site = Sites::findOrFail($id);
+        $user = $site->user;
+        $categories = Category::all();
+
+        return view('sites.edit', compact('site','user','categories'));
     }
 
     /**
@@ -155,9 +169,42 @@ class SitesController extends Controller
      * @param  \App\Sites  $sites
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Sites $sites)
+    public function update(SiteStoreRequest $request, $id)
     {
-        //
+        $site = Sites::findOrFail($id);
+
+        $user = Auth::user();
+
+        if(request('tags')){
+            $tags = request('tags');
+            $tags = (implode($tags,','));
+        }else{
+            $tags = "";
+        }
+        if($request->file('banner')){
+            $file = $request->file('banner');
+            $destinationPath = 'images/'.$user->name;
+            $file->move($destinationPath,$file->getClientOriginalName());
+            $url_file = $destinationPath.'/'.$file->getClientOriginalName();
+        }else{
+            $url_file = $site->url_file;   
+        }        
+
+        DB::table('sites')
+            ->where('id', $id)
+            ->update([
+                'title' => request('title'),
+                'description' => request('description'),
+                'p_description' => request('p_description'),
+                'category_id' => request('category'),
+                'url' => request('website'),
+                'url_file' => $url_file,
+                'tags' => $tags,
+        ]);
+
+        Session::flash('flash_message', 'Task successfully added!');
+
+        return redirect()->back();
     }
 
     /**
@@ -166,9 +213,13 @@ class SitesController extends Controller
      * @param  \App\Sites  $sites
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Sites $sites)
+    public function destroy($id)
     {
-        //
+        $user = Sites::findOrFail($id);
+
+        $user->delete();
+
+        return redirect()->back();
     }
 
     public function vote($id)
@@ -235,5 +286,16 @@ class SitesController extends Controller
                             'ip' => $ip,
                             'created_at' => $now,
                         ]);
+    }
+
+
+    public function dashboard()
+    {
+        $user = Auth::user();
+        $sites = Sites::with('category')->where('user_id', $user->id)->get();
+
+        //dd($sites);
+
+        return view('sites.dashboard', compact('sites'));
     }
 }

@@ -133,7 +133,7 @@ class SitesController extends Controller
             ],
             [
                 "label" => "Visits",
-                'backgroundColor' => "rgba(38, 185, 154, 0.31)",
+                'backgroundColor' => "rgba(233, 67, 67, 0.8)",
                 'borderColor' => "rgba(38, 185, 154, 0.7)",
                 "pointBorderColor" => "rgba(38, 185, 154, 0.7)",
                 "pointBackgroundColor" => "rgba(38, 185, 154, 0.7)",

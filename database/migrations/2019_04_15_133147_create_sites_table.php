@@ -18,7 +18,7 @@ class CreateSitesTable extends Migration
             $table->integer('rank')->nullable();
             $table->string('title', 100);
             $table->string('description', 255);
-            $table->string('p_description', 2500);
+            $table->string('p_description', 2500)->nullable();
             $table->string('tags', 50)->nullable();
             $table->integer('category_id')->unsigned()->nullable();
             $table->foreign('category_id')->references('id')->on('categories');

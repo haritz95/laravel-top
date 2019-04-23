@@ -41,14 +41,14 @@ class HomeController extends Controller
     public function admin_credential_rules(array $data)
     {
       $messages = [
-        'current-password.required' => 'Please enter current password',
-        'password.required' => 'Please enter password',
+        'current.required' => 'Please enter current password',
+        'password.required' => 'Please enter the new password',
       ];
 
       $validator = Validator::make($data, [
-        'current-password' => 'required',
+        'current' => 'required',
         'password' => 'required|same:password',
-        'password_confirmation' => 'required|same:password',     
+        'confirmation' => 'required|same:password',     
       ], $messages);
 
       return $validator;
@@ -63,23 +63,26 @@ class HomeController extends Controller
         if($validator->fails())
         {
 
-          return Redirect::back()->with('errors', $validator->getMessageBag());
-          //return response()->json(array('error' => $validator->getMessageBag()->toArray()), 400);
+          //return Redirect::back()->with('errors', $validator->getMessageBag());
+            return response()->json(['errors'=>$validator->getMessageBag()->all()]);
+          //return response()->json(array('errors' => $validator->getMessageBag()->toArray()), 400);
         }
         else
         {  
           $current_password = Auth::User()->password;           
-          if(Hash::check($request_data['current-password'], $current_password))
+          if(Hash::check($request_data['current'], $current_password))
           {           
             $user_id = Auth::User()->id;                       
             $obj_user = User::find($user_id);
             $obj_user->password = Hash::make($request_data['password']);;
             $obj_user->save(); 
-            return Redirect::back()->with('message', 'Password updated');
+            return 'Password updated';
+            //return Redirect::back()->with('success', 'Password updated');
           }
           else
-          {           
-            return Redirect::back()->with('not_match', 'Please enter correct current password');   
+          {       
+            $message = 'Please enter correct current password';
+            return response()->json(['errors'=> explode(', ', $message)]);    
           }
         }        
       }

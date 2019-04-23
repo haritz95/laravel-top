@@ -36,8 +36,13 @@
             </div>
             <div class="col-md-8">
                 <div class="card">
-                    <img class="img-fluid" src="{{ URL::to('/') }}/images/header.jpg">
+                    <center><img class="img-fluid mt-2" src="{{ URL::to('/') }}/images/header.png" width="350px" height="150px"></center>
+                    <hr>
+                    @if($site->premium === 1)
                         <span class="m-2">{!! $site->p_description !!}</span>
+                    @else
+                        <h1 class="m-2">{{ $site->description }}</h1>
+                    @endif    
                 </div>
             </div>
     </div>

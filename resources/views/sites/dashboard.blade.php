@@ -7,16 +7,16 @@
             <div class="card mb-3">
               <div class="card-header">Dashboard</div>
                 <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                  <a class="nav-link @if(!$errors->count() || (!session()->has('not_match') || !session()->has('not_match'))) active @endif" id="v-pills-home-tab" data-toggle="pill" href="#v-pills-home" role="tab" aria-controls="v-pills-home" aria-selected="true">My Sites</a>
+                  <a class="nav-link active" id="v-pills-home-tab" data-toggle="pill" href="#v-pills-home" role="tab" aria-controls="v-pills-home" aria-selected="true">My Sites</a>
                   <a class="nav-link" id="v-pills-profile-tab" data-toggle="pill" href="#v-pills-profile" role="tab" aria-controls="v-pills-profile" aria-selected="false">Buy Premium</a>
                   <a class="nav-link" id="v-pills-messages-tab" data-toggle="pill" href="#v-pills-messages" role="tab" aria-controls="v-pills-messages" aria-selected="false">Create Ad</a>
-                  <a class="nav-link {{($errors->first('password') ? " active" : "")}} @if(session()->has('not_match') || session()->has('message')) active @endif" id="v-pills-settings-tab" data-toggle="pill" href="#v-pills-settings" role="tab" aria-controls="v-pills-settings" aria-selected="false">Account</a>
+                  <a class="nav-link" id="v-pills-settings-tab" data-toggle="pill" href="#v-pills-settings" role="tab" aria-controls="v-pills-settings" aria-selected="false">Account</a>
                   <a class="nav-link" href="{{ route('logout') }}"
                                        onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();">
                                         {{ __('Logout') }}
                                     </a>
-                  <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                  <form id="logout-form-dashboard" action="{{ route('logout') }}" method="POST" style="display: none;">
                                         @csrf
                                     </form>
                 </div>
@@ -26,7 +26,7 @@
             <div class="card mb-3">
               <div class="card-header">My Sites</div>
                 <div class="tab-content" id="v-pills-tabContent">
-                  <div class="tab-pane fade show @if(!$errors->count() || (!session()->has('not_match') || !session()->has('not_match'))) active @endif m-3" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">
+                  <div class="tab-pane fade show active m-3" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <h1 class="float-left">My Sites</h1><a href="{{ route('sites.create') }}" class="btn btn-danger float-right mb-2"><i class="fas fa-plus"></i> New Site</a>
@@ -62,14 +62,17 @@
                   </div>
                   <div class="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">...</div>
                   <div class="tab-pane fade" id="v-pills-messages" role="tabpanel" aria-labelledby="v-pills-messages-tab">...</div>
-                  <div class="tab-pane {{($errors->first('password') ? " active" : "")}}{{($errors->first('current-password') ? " active" : "")}}{{($errors->first('password_confirmation') ? " active" : "")}} @if(session()->has('not_match') || session()->has('message')) active @endif m-3" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab">
+                  <div class="tab-pane m-3" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab">
+                    <div class="alert alert-danger" role="alert" style="display: none;">
+                      
+                    </div>
                     <h1>My Account</h1>
                     <div class="form-group">
                       <label>Username</label>
                       <input type="text" name="username" class="form-control" value="{{ Auth::user()->name }}" disabled="disabled">
                       <small>The username can not be changed.</small>
                     </div>
-                    <form class="" action="{{ url('/dashboard/account/password_update') }}" method="POST">
+                    <form>
                     <input type="hidden" name="_token" value="{{ csrf_token() }}"> 
                     <div class="form-group"> 
                       <label>E-mail</label>
@@ -78,7 +81,7 @@
                     </div>
                     <div class="form-group"> 
                       <label>Current Password</label>
-                      <input type="password" name="current-password" class="form-control {{($errors->first('current-password') ? " form-error" : "")}}  @if(session()->has('not_match'))form-error @endif">
+                      <input type="password" name="current-password" id="current-password" class="form-control {{($errors->first('current-password') ? " form-error" : "")}}  @if(session()->has('not_match'))form-error @endif">
                       @if ($errors->has('current-password'))
                         <div class="error">{{ $errors->first('current-password') }}</div>
                       @endif
@@ -88,19 +91,19 @@
                     </div>
                     <div class="form-group"> 
                       <label>New Password</label>
-                      <input type="password" name="password" class="form-control {{($errors->first('password') ? " form-error" : "")}}">
+                      <input type="password" name="password" id="password" class="form-control {{($errors->first('password') ? " form-error" : "")}}">
                       @if ($errors->has('password'))
                         <div class="error">{{ $errors->first('password') }}</div>
                     @endif
                     </div>
                     <div class="form-group"> 
                       <label>Confirm Password</label>
-                      <input type="password" name="password_confirmation" class="form-control {{($errors->first('password_confirmation') ? " form-error" : "")}}">
+                      <input type="password" name="password_confirmation" id="password_confirmation" class="form-control {{($errors->first('password_confirmation') ? " form-error" : "")}}">
                       @if ($errors->has('password_confirmation'))
                         <div class="error">{{ $errors->first('password_confirmation') }}</div>
                     @endif
                     </div>
-                    <input class="btn btn-success" type="submit" value="Update">
+                    <button class="btn btn-success"  id="update_account">Update</button>
                     </form>
                     </div>
                   </div>

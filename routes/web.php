@@ -23,4 +23,5 @@ Route::post('/site/store', 'SitesController@store');
 Route::post('/visit/add', 'SitesController@storeVisit')->name('visit');
 Route::get('/dashboard', 'SitesController@dashboard')->name('dashboard');
 Route::post('/dashboard/account/password_update', 'HomeController@postCredentials');
+Route::post('/dashboard/create_ad', 'SitesController@storeAd')->name('store_ad');
 

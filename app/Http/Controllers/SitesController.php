@@ -293,9 +293,44 @@ class SitesController extends Controller
     {
         $user = Auth::user();
         $sites = Sites::with('category')->where('user_id', $user->id)->get();
+        $ad_spots = DB::table('table_ad_spots')->where('active', 1)->get();
+        $ad_period = DB::table('table_ads_period')->get();
 
         //dd($sites);
 
-        return view('sites.dashboard', compact('sites'));
+        return view('sites.dashboard', compact('sites', 'ad_spots', 'ad_period'));
+    }
+
+    public function storeAd_rules(array $data)
+    {
+      $messages = [
+        'current.required' => 'Please enter current password',
+        'password.required' => 'Please enter the new password',
+      ];
+
+      $validator = Validator::make($data, [
+        'current' => 'required|min:8',
+        'password' => 'required|same:password|min:8',
+        'confirmation' => 'required|same:password|min:8',     
+      ], $messages);
+
+      return $validator;
+    }  
+
+
+    public function storeAd(Request $request)
+    {
+        $now = Carbon\Carbon::now();
+        $data = DB::table('ads')
+                        ->insert([
+                            'id_spot' => request('spot'),
+                            'website' => request('website'),
+                            'banner' => request('banner_link'),
+                            'active' => 0,
+                            'end_ad' => $now->addDays(request('days')),
+                            'user_id' => Auth::user()->id,
+                            'created_at' => $now,
+                            'updated_at' => $now,
+                        ]);
     }
 }

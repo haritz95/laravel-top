@@ -46,9 +46,9 @@ class HomeController extends Controller
       ];
 
       $validator = Validator::make($data, [
-        'current' => 'required',
-        'password' => 'required|same:password',
-        'confirmation' => 'required|same:password',     
+        'current' => 'required|min:8',
+        'password' => 'required|same:password|min:8',
+        'confirmation' => 'required|same:password|min:8',     
       ], $messages);
 
       return $validator;

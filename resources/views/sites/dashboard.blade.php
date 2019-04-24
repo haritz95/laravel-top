@@ -61,9 +61,76 @@
                     </div>
                   </div>
                   <div class="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">...</div>
-                  <div class="tab-pane fade" id="v-pills-messages" role="tabpanel" aria-labelledby="v-pills-messages-tab">...</div>
+                  <div class="tab-pane fade m-3" id="v-pills-messages" role="tabpanel" aria-labelledby="v-pills-messages-tab">
+                    <h1>Create Ad</h1>
+                    <form>
+                      <input type="hidden" name="_token" value="{{ csrf_token() }}"> 
+                      <div class="form-row">
+                        <div class="form-group col-md-12">
+                          <label for="spot" style="font-size: 1vw">Spot</label>
+                          <select id="spot" class="form-control" name="spot" required="required" style="width: 100%" value="{{Request::old('spot')}}">
+                            <option selected="selected" value="">Choose...</option>
+                            @foreach($ad_spots as $ad_spot)
+                              <option value="{{ $ad_spot->id }}">{{ $ad_spot->name }}</option>
+                            @endforeach
+                            
+                          </select>
+                            @if ($errors->has('spot'))
+                                <div class="error">{{ $errors->first('spot') }}</div>
+                            @endif
+                        </div>
+                        <div class="form-group col-md-12">
+                          <label for="category" style="font-size: 1vw">Spot</label>
+                          <select id="days" class="form-control" name="days" required="required" style="width: 100%" value="{{Request::old('spot')}}">
+                            <option selected="selected" value="">Choose...</option>
+                            @foreach($ad_period as $period)
+                              <option value="{{ $period->days }}">{{ $period->display_name }}</option>
+                            @endforeach
+                            
+                          </select>
+                            @if ($errors->has('spot'))
+                                <div class="error">{{ $errors->first('spot') }}</div>
+                            @endif
+                        </div>
+                        <div class="form-group col-md-12">
+                          <label for="title" style="font-size: 1vw">Ad Title</label>
+                          <input type="text" class="form-control" id="title" name="ad_title" placeholder="AD Tittle" required="required"  minlength="5" maxlength="100" value="{{Request::old('ad_tittle')}}">
+                          @if ($errors->has('ad_tittle'))
+                            <div class="error">{{ $errors->first('ad_tittle') }}</div>
+                          @endif
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label for="website" style="font-size: 1vw">Website</label>
+                        <input type="text" class="form-control{{($errors->first('website') ? " form-error" : "")}}" id="website" name="website" placeholder="https://top.test/" required="required" minlength="8" maxlength="100" value="{{Request::old('website')}}">
+                        @if ($errors->has('website'))
+                            <div class="error">{{ $errors->first('website') }}</div>
+                        @endif
+                      </div>
+                      <div class="form-row">
+                        <div class="form-group col-md-12">
+                          <label for="banner" style="font-size: 1vw">Upload Banner</label>
+                            <input type="file" class="form-control-file" id="banner_upload" name="banner">
+                            <small id="fileHelp" class="form-text text-muted" style="font-size: 0.7vw">The file must be, JPG,JPEG,PNG or GIF. Maximun size: 5MB</small>
+                            @if ($errors->has('banner'))
+                                <div class="error">{{ $errors->first('banner') }}</div>
+                            @endif
+                        </div>
+                      </div>
+                      <div class="form-row">
+                        <div class="form-group col-md-12">
+                          <label for="banner" style="font-size: 1vw">Link Banner</label>
+                            <input type="text" class="form-control" id="banner_link" name="banner" placeholder="https://yourdomain.com/image.jpg">
+                            @if ($errors->has('banner'))
+                                <div class="error">{{ $errors->first('banner') }}</div>
+                            @endif
+                        </div>
+                      </div>
+                      <button class="btn btn-primary mb-2" id="create_ad">Submit</button>
+                    </form>
+                  </div>
                   <div class="tab-pane m-3" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab">
-                    <div class="alert alert-danger" role="alert" style="display: none;">
+                    <div class="alert alert-danger" id="pass_info" role="alert" style="display: none;">
                       
                     </div>
                     <h1>My Account</h1>
@@ -81,27 +148,15 @@
                     </div>
                     <div class="form-group"> 
                       <label>Current Password</label>
-                      <input type="password" name="current-password" id="current-password" class="form-control {{($errors->first('current-password') ? " form-error" : "")}}  @if(session()->has('not_match'))form-error @endif">
-                      @if ($errors->has('current-password'))
-                        <div class="error">{{ $errors->first('current-password') }}</div>
-                      @endif
-                      @if(session()->has('not_match'))
-                        <div class="error">{{ session()->get('not_match') }}</div>
-                      @endif
+                      <input type="password" name="current-password" id="current-password" class="form-control" required="required" minlength="8">
                     </div>
                     <div class="form-group"> 
                       <label>New Password</label>
-                      <input type="password" name="password" id="password" class="form-control {{($errors->first('password') ? " form-error" : "")}}">
-                      @if ($errors->has('password'))
-                        <div class="error">{{ $errors->first('password') }}</div>
-                    @endif
+                      <input type="password" name="password" id="password" class="form-control" required="required" minlength="8">
                     </div>
                     <div class="form-group"> 
                       <label>Confirm Password</label>
-                      <input type="password" name="password_confirmation" id="password_confirmation" class="form-control {{($errors->first('password_confirmation') ? " form-error" : "")}}">
-                      @if ($errors->has('password_confirmation'))
-                        <div class="error">{{ $errors->first('password_confirmation') }}</div>
-                    @endif
+                      <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" required="required" minlength="8">
                     </div>
                     <button class="btn btn-success"  id="update_account">Update</button>
                     </form>

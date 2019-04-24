@@ -79,6 +79,16 @@ jQuery(document).ready(function(){
                       jQuery('.alert-success').fadeIn();
                       jQuery('.alert-success').append('<p>'+data+'</p>');
                       setTimeout(function() { $(".alert-success").fadeOut(); }, 2000);
+                      var logout = function(){$.ajax
+                      ({
+                          type: 'POST',
+                          url: '/logout',
+                          success: function()
+                          {
+                              location.reload();
+                          }
+                      });}
+                      setTimeout(logout, 3000);
                     }   
                   }
                     
@@ -89,6 +99,7 @@ jQuery(document).ready(function(){
 /* CREATE A NEW ADD */
 jQuery(document).ready(function(){
             jQuery('#create_ad').click(function(e){
+              $( "#ad_info" ).html('');
                e.preventDefault();
                jQuery.ajaxSetup({
                   headers: {
@@ -106,12 +117,22 @@ jQuery(document).ready(function(){
                   },
                   success: function(data){
                     if (data instanceof Object) {
-               
+                      jQuery.each(data.errors, function(key, value){
+                        jQuery('#pass_info').removeClass('alert-succes');
+                        jQuery('#pass_info').addClass('alert-danger');
+                        jQuery('.alert-danger').fadeIn();
+                        jQuery('.alert-danger').append('<p>'+value+'</p>');
+                        setTimeout(function() { $(".alert-danger").fadeOut(); }, 5000);
+                      });
                     }else{
-                      alert("perfect");
+                      jQuery('#ad_info').removeClass('alert-danger');
+                      jQuery('#ad_info').addClass('alert-success');
+                      jQuery('.alert-success').fadeIn();
+                      jQuery('.alert-success').append('<p>'+data+'</p>');
+                      $('#create_ad_form').trigger("reset");
+                      setTimeout(function() { $(".alert-success").fadeOut(); }, 2000);
                     }   
                   }
-                    
                   });
                });
             });

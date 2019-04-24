@@ -304,14 +304,17 @@ class SitesController extends Controller
     public function storeAd_rules(array $data)
     {
       $messages = [
-        'current.required' => 'Please enter current password',
-        'password.required' => 'Please enter the new password',
+        'spot.required' => 'Please select a spot',
+        'days.required' => 'Please select a plan',
+        'website' => 'required|url|min:8|max:100',
+        'banner_link.required' => 'Please enter a valid url',
       ];
 
       $validator = Validator::make($data, [
-        'current' => 'required|min:8',
-        'password' => 'required|same:password|min:8',
-        'confirmation' => 'required|same:password|min:8',     
+        'spot' => 'required',
+        'days' => 'required',
+        'website' => 'required',
+        'banner_link' => 'required',     
       ], $messages);
 
       return $validator;
@@ -321,16 +324,26 @@ class SitesController extends Controller
     public function storeAd(Request $request)
     {
         $now = Carbon\Carbon::now();
-        $data = DB::table('ads')
-                        ->insert([
-                            'id_spot' => request('spot'),
-                            'website' => request('website'),
-                            'banner' => request('banner_link'),
-                            'active' => 0,
-                            'end_ad' => $now->addDays(request('days')),
-                            'user_id' => Auth::user()->id,
-                            'created_at' => $now,
-                            'updated_at' => $now,
-                        ]);
+
+        $request_data = $request->All();
+        $validator = $this->storeAd_rules($request_data);
+
+        if($validator->fails())
+        {
+            return response()->json(['errors'=>$validator->getMessageBag()->all()]);
+        }else{
+             $data = DB::table('ads')->insert([
+                'id_spot' => request('spot'),
+                'website' => request('website'),
+                'banner' => request('banner_link'),
+                'active' => 0,
+                'end_ad' => $now->addDays(request('days')),
+                'user_id' => Auth::user()->id,
+                'created_at' => $now,
+                'updated_at' => $now]);
+
+             return "Ad created.";
+        }
     }
+ 
 }

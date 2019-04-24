@@ -62,8 +62,11 @@
                   </div>
                   <div class="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">...</div>
                   <div class="tab-pane fade m-3" id="v-pills-messages" role="tabpanel" aria-labelledby="v-pills-messages-tab">
+                    <div class="alert alert-danger" id="ad_info" role="alert" style="display: none;">
+                      
+                    </div>
                     <h1>Create Ad</h1>
-                    <form>
+                    <form id="create_ad_form">
                       <input type="hidden" name="_token" value="{{ csrf_token() }}"> 
                       <div class="form-row">
                         <div class="form-group col-md-12">
@@ -80,7 +83,7 @@
                             @endif
                         </div>
                         <div class="form-group col-md-12">
-                          <label for="category" style="font-size: 1vw">Spot</label>
+                          <label for="category" style="font-size: 1vw">Plan</label>
                           <select id="days" class="form-control" name="days" required="required" style="width: 100%" value="{{Request::old('spot')}}">
                             <option selected="selected" value="">Choose...</option>
                             @foreach($ad_period as $period)
@@ -110,7 +113,7 @@
                       <div class="form-row">
                         <div class="form-group col-md-12">
                           <label for="banner" style="font-size: 1vw">Upload Banner</label>
-                            <input type="file" class="form-control-file" id="banner_upload" name="banner">
+                            <input type="file" class="form-control-file" id="banner_upload" name="banner_upload">
                             <small id="fileHelp" class="form-text text-muted" style="font-size: 0.7vw">The file must be, JPG,JPEG,PNG or GIF. Maximun size: 5MB</small>
                             @if ($errors->has('banner'))
                                 <div class="error">{{ $errors->first('banner') }}</div>
@@ -120,7 +123,7 @@
                       <div class="form-row">
                         <div class="form-group col-md-12">
                           <label for="banner" style="font-size: 1vw">Link Banner</label>
-                            <input type="text" class="form-control" id="banner_link" name="banner" placeholder="https://yourdomain.com/image.jpg">
+                            <input type="text" class="form-control" id="banner_link" name="banner_link" placeholder="https://yourdomain.com/image.jpg">
                             @if ($errors->has('banner'))
                                 <div class="error">{{ $errors->first('banner') }}</div>
                             @endif

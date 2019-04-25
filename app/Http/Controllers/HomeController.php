@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\User; 
 use App\Sites;
+use App\Ad;
 use DB;
 use Auth;
 use Validator;
@@ -34,8 +35,9 @@ class HomeController extends Controller
     {
 
         $sites = DB::table('sites')->where('status_id', 1)->orderBy('votes','desc')->simplePaginate(15);
+        $ads = Ad::inRandomOrder()->limit(6)->where('active', 1)->get();
 
-        return view('sites.index', compact('sites'));
+        return view('sites.index', compact('sites', 'ads'));
     }
 
     public function admin_credential_rules(array $data)

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Sites;
 use App\Category;
+use App\Ad;
 use Illuminate\Http\Request;
 use DB;
 use Carbon;
@@ -29,8 +30,9 @@ class SitesController extends Controller
     public function index()
     {
         $sites = DB::table('sites')->where('status_id', 1)->orderBy('votes','desc')->simplePaginate(15);
+        $ads = Ad::inRandomOrder()->limit(6)->where('active', 1)->get();
 
-        return view('sites.index', compact('sites'));  
+        return view('sites.index', compact('sites', 'ads'));  
     }
 
     /**
@@ -295,10 +297,19 @@ class SitesController extends Controller
         $sites = Sites::with('category')->where('user_id', $user->id)->get();
         $ad_spots = DB::table('table_ad_spots')->where('active', 1)->get();
         $ad_period = DB::table('table_ads_period')->get();
+        $my_ads = Ad::with('spots')->where('user_id', $user->id)->get();
 
         //dd($sites);
 
-        return view('sites.dashboard', compact('sites', 'ad_spots', 'ad_period'));
+        return view('sites.dashboard', compact('sites', 'ad_spots', 'ad_period', 'my_ads'));
+    }
+
+    public function adCreate()
+    {
+        $ad_spots = DB::table('table_ad_spots')->where('active', 1)->get();
+        $ad_period = DB::table('table_ads_period')->get();
+
+        return view('ads.create', compact('ad_spots', 'ad_period'));
     }
 
     public function storeAd_rules(array $data)
@@ -306,6 +317,7 @@ class SitesController extends Controller
       $messages = [
         'spot.required' => 'Please select a spot',
         'days.required' => 'Please select a plan',
+        'tiitle.required' => 'Title is required',
         'website' => 'required|url|min:8|max:100',
         'banner_link.required' => 'Please enter a valid url',
       ];
@@ -313,6 +325,7 @@ class SitesController extends Controller
       $validator = Validator::make($data, [
         'spot' => 'required',
         'days' => 'required',
+        'titlle' => 'required',
         'website' => 'required',
         'banner_link' => 'required',     
       ], $messages);
@@ -344,6 +357,13 @@ class SitesController extends Controller
 
              return "Ad created.";
         }
+    }
+
+    public function clickAd($id)
+    {
+        $ad = Ad::findorfail($id); // Find our post by ID.
+        $ad->increment('clicks'); // Increment the value in the clicks column.
+        $ad->update(); // Save our updated post.
     }
  
 }

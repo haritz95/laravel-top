@@ -136,3 +136,27 @@ jQuery(document).ready(function(){
                   });
                });
             });
+
+
+$( '.ad-site' ).click(function(e) {;
+  e.preventDefault; // Prevent the default behavior of the  element.
+  var adId = $(this).data('id'); // Get the post ID from our data attribute
+  registerPostClick(adId); // Pass that ID to our function. 
+});
+
+function registerPostClick(postId) {
+  $.ajaxSetup({
+      headers: {
+          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+      }
+  })
+  $.ajax({
+    type: 'post',
+    dataType: 'JSON',
+    url: '/ad/' + postId + '/click',
+    error: function (xhr, ajaxOptions, thrownError) {
+           console.log(xhr.status);
+           console.log(JSON.stringify(xhr.responseText));
+       }
+  });
+}

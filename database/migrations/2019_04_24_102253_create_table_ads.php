@@ -15,13 +15,16 @@ class CreateTableAds extends Migration
     {
         Schema::create('ads', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('id_spot')->unsigned()->nullable();
+            $table->integer('id_spot')->unsigned();
             $table->foreign('id_spot')->references('id')->on('table_ad_spots');
+            $table->string('title');
             $table->string('website');
             $table->string('banner');
             $table->boolean('active');
+            $table->integer('views');
+            $table->integer('cliks');
             $table->dateTime('end_ad');
-            $table->integer('user_id')->unsigned()->nullable();
+            $table->integer('user_id')->unsigned();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });

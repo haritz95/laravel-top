@@ -2,23 +2,28 @@
 @section('content')
 <div class="container">
     <div class="row">
-        <div class="col-md-12">
+        
+  
+            @foreach($ads as $ad)
+            <div class="col-md-6">
+            <div class="col-md-12">
             <div class="row test">
-                <div class="col-md-2 text-center">
-                    <h1>Rank</h1>
-                    <h1 class="center">-</h1>
-                </div>
-                <div class="col-md-8 text-center">
-                    <h4><a href="http://top.test/" class="server-title">AD</a></h4>
-                    <center><a href="http://top.test/"><img style="width: 468; height: 60;" class="img-fluid" src="http://top.test/images/ad.jpg">
+                <div class="col-md-8 text-center mt-3">
+                    <center><a href="{{$ad->website}}" target="_blank" ><img style="width: 468px; height: 60px;" class="img-fluid mb-3 ad-site"   src="{{$ad->banner}}" data-id="{{$ad->id}}">
                     </a></center>
-                    <h7>AD</h7>
                 </div>
-                <div class="col-md-2 text-center">
-                    <h1>Votes</h1>
-                    <h1 class="center">-</h1>
+                <div class="col-md-4 text-center"style="margin-top: auto; margin-bottom: auto;">
+                    <h4>{{$ad->title}}</h4>
                 </div>
             </div>
+            </div>
+            </div>
+            @endforeach
+           
+        
+    </div>
+    <div class="row">
+        <div class="col-md-12">
             <hr>
             @foreach($sites as $site)
             @if($site->premium === 1)

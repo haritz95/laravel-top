@@ -23,5 +23,7 @@ Route::post('/site/store', 'SitesController@store');
 Route::post('/visit/add', 'SitesController@storeVisit')->name('visit');
 Route::get('/dashboard', 'SitesController@dashboard')->name('dashboard');
 Route::post('/dashboard/account/password_update', 'HomeController@postCredentials');
+Route::get('/dashboard/ad/create', 'SitesController@adCreate')->name('ad_create');
 Route::post('/dashboard/create_ad', 'SitesController@storeAd')->name('store_ad');
+Route::post('/ad/{id}/click', 'SitesController@clickAd');
 

@@ -8,8 +8,13 @@
               <div class="card-header">Dashboard</div>
                 <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
                   <a class="nav-link active" id="v-pills-home-tab" data-toggle="pill" href="#v-pills-home" role="tab" aria-controls="v-pills-home" aria-selected="true">My Sites</a>
+                  <a class="nav-link" href="{{ route('sites.create') }}" aria-selected="true">New Site</a>
+                  <div class="card-header">Premium</div>
                   <a class="nav-link" id="v-pills-profile-tab" data-toggle="pill" href="#v-pills-profile" role="tab" aria-controls="v-pills-profile" aria-selected="false">Buy Premium</a>
-                  <a class="nav-link" id="v-pills-messages-tab" data-toggle="pill" href="#v-pills-messages" role="tab" aria-controls="v-pills-messages" aria-selected="false">Create Ad</a>
+                  <div class="card-header">Ads</div>
+                  <a class="nav-link" id="my-ads-tab" data-toggle="pill" href="#t-my-ads" role="tab" aria-controls="t-my-ads" aria-selected="false">My Ads</a>
+                  <a class="nav-link" href="{{ url('/dashboard/ad/create') }}" aria-selected="true">New Ad</a>
+                  <div class="card-header">My Account</div>
                   <a class="nav-link" id="v-pills-settings-tab" data-toggle="pill" href="#v-pills-settings" role="tab" aria-controls="v-pills-settings" aria-selected="false">Account</a>
                   <a class="nav-link" href="{{ route('logout') }}"
                                        onclick="event.preventDefault();
@@ -26,6 +31,7 @@
             <div class="card mb-3">
               <div class="card-header">My Sites</div>
                 <div class="tab-content" id="v-pills-tabContent">
+                  <!-- TAB MY SITES -->
                   <div class="tab-pane fade show active m-3" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">
                     <div class="table-responsive">
                         <table class="table table-striped">
@@ -60,78 +66,54 @@
                         </table>
                     </div>
                   </div>
+                  <!-- TAB BUY PREMIUM -->
                   <div class="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">...</div>
-                  <div class="tab-pane fade m-3" id="v-pills-messages" role="tabpanel" aria-labelledby="v-pills-messages-tab">
-                    <div class="alert alert-danger" id="ad_info" role="alert" style="display: none;">
-                      
+                  <!-- TAB MY ADS -->
+                  <div class="tab-pane fade m-3" id="t-my-ads" role="tabpanel" aria-labelledby="my-ads-tab">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <h1 class="float-left">My Ads</h1><a href="{{ url('/dashboard/ad/create') }}" class="btn btn-danger float-right mb-2"><i class="fas fa-plus"></i> New Ad</a>
+                          <thead>
+                            <tr>
+                              <th scope="col">#</th>
+                              <th scope="col">Title</th>
+                              <th scope="col">Expires</th>
+                              <th scope="col">Spot</th>
+                              <th scope="col">Status</th>
+                              <th scope="col">Views</th>
+                              <th scope="col">Clics</th>
+                              <th scope="col">Action</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            @foreach($my_ads as $ad)
+                            <tr>
+                                <th>#</th>
+                                <th>{{ $ad->title }}</th>
+                                @if($ad->active === 1)
+                                <th>{{ $diff = Carbon\Carbon::parse($ad->end_ad)->diffInDays(Carbon\Carbon::now()) }} days</th>
+                                @else
+                                <th class="text-center">-</th>
+                                @endif
+                                <th>{{ $ad->spots['name'] }}</th>
+                                <th>@if($ad->active === 1) <span class="badge badge-success">ACTIVE</span> @else <span class="badge badge-danger">INACTIVE</span> @endif</th>
+                                <th>{{ $ad->views }}</th>
+                                <th>{{ $ad->clicks }}</th>
+                                <th><div class="btn-group inline pull-left">
+                                    <div class="inner"><a href="{{ route('sites.show', $ad->id) }}" class="btn btn-primary mr-1"><i class="far fa-eye"></i></a></div>
+                                    <div class="inner"><a href="{{ route('sites.edit', $ad->id) }}" class="btn btn-success mr-1"><i class="fas fa-edit"></i></a></div>
+                                    <div class="inner">
+                                      <a href="javascript:;" data-toggle="modal" onclick="deleteData({{$ad->id}})" 
+                                          data-target="#delete" class="btn btn-xs btn-danger"><i class="far fa-trash-alt"></i></a>
+                                    </div>
+                                </div></th>
+                            </tr>
+                            @endforeach
+                          </tbody>
+                        </table>
                     </div>
-                    <h1>Create Ad</h1>
-                    <form id="create_ad_form">
-                      <input type="hidden" name="_token" value="{{ csrf_token() }}"> 
-                      <div class="form-row">
-                        <div class="form-group col-md-12">
-                          <label for="spot" style="font-size: 1vw">Spot</label>
-                          <select id="spot" class="form-control" name="spot" required="required" style="width: 100%" value="{{Request::old('spot')}}">
-                            <option selected="selected" value="">Choose...</option>
-                            @foreach($ad_spots as $ad_spot)
-                              <option value="{{ $ad_spot->id }}">{{ $ad_spot->name }}</option>
-                            @endforeach
-                            
-                          </select>
-                            @if ($errors->has('spot'))
-                                <div class="error">{{ $errors->first('spot') }}</div>
-                            @endif
-                        </div>
-                        <div class="form-group col-md-12">
-                          <label for="category" style="font-size: 1vw">Plan</label>
-                          <select id="days" class="form-control" name="days" required="required" style="width: 100%" value="{{Request::old('spot')}}">
-                            <option selected="selected" value="">Choose...</option>
-                            @foreach($ad_period as $period)
-                              <option value="{{ $period->days }}">{{ $period->display_name }}</option>
-                            @endforeach
-                            
-                          </select>
-                            @if ($errors->has('spot'))
-                                <div class="error">{{ $errors->first('spot') }}</div>
-                            @endif
-                        </div>
-                        <div class="form-group col-md-12">
-                          <label for="title" style="font-size: 1vw">Ad Title</label>
-                          <input type="text" class="form-control" id="title" name="ad_title" placeholder="AD Tittle" required="required"  minlength="5" maxlength="100" value="{{Request::old('ad_tittle')}}">
-                          @if ($errors->has('ad_tittle'))
-                            <div class="error">{{ $errors->first('ad_tittle') }}</div>
-                          @endif
-                        </div>
-                      </div>
-                      <div class="form-group">
-                        <label for="website" style="font-size: 1vw">Website</label>
-                        <input type="text" class="form-control{{($errors->first('website') ? " form-error" : "")}}" id="website" name="website" placeholder="https://top.test/" required="required" minlength="8" maxlength="100" value="{{Request::old('website')}}">
-                        @if ($errors->has('website'))
-                            <div class="error">{{ $errors->first('website') }}</div>
-                        @endif
-                      </div>
-                      <div class="form-row">
-                        <div class="form-group col-md-12">
-                          <label for="banner" style="font-size: 1vw">Upload Banner</label>
-                            <input type="file" class="form-control-file" id="banner_upload" name="banner_upload">
-                            <small id="fileHelp" class="form-text text-muted" style="font-size: 0.7vw">The file must be, JPG,JPEG,PNG or GIF. Maximun size: 5MB</small>
-                            @if ($errors->has('banner'))
-                                <div class="error">{{ $errors->first('banner') }}</div>
-                            @endif
-                        </div>
-                      </div>
-                      <div class="form-row">
-                        <div class="form-group col-md-12">
-                          <label for="banner" style="font-size: 1vw">Link Banner</label>
-                            <input type="text" class="form-control" id="banner_link" name="banner_link" placeholder="https://yourdomain.com/image.jpg">
-                            @if ($errors->has('banner'))
-                                <div class="error">{{ $errors->first('banner') }}</div>
-                            @endif
-                        </div>
-                      </div>
-                      <button class="btn btn-primary mb-2" id="create_ad">Submit</button>
-                    </form>
                   </div>
+                  <!-- TAB ACCOUNT -->
                   <div class="tab-pane m-3" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab">
                     <div class="alert alert-danger" id="pass_info" role="alert" style="display: none;">
                       

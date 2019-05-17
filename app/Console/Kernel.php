@@ -29,8 +29,9 @@ class Kernel extends ConsoleKernel
         //          ->hourly();
 
         $schedule->command('check:premium')->everyMinute();
-        $schedule->command('update:rank')->everyThirtyMinutes();
-        $schedule->command('count:votes')->everyThirtyMinutes();
+        $schedule->command('update:rank')->everyMinute();
+        $schedule->command('count:votes')->everyMinute();
+        $schedule->command('check:ad')->everyMinute();
     }
 
     /**

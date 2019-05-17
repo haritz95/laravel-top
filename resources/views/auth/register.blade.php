@@ -61,6 +61,15 @@
                             </div>
                         </div>
 
+                        <div class="form-group row mb-2">
+                            <div class="col-md-6 offset-md-4">
+                                {!! NoCaptcha::display() !!}
+                                @if ($errors->has('g-recaptcha-response'))
+                                    <div class="error mb-2"><strong style="color: red">{{ $errors->first('g-recaptcha-response') }}</strong></div>
+                                @endif
+                            </div>
+                        </div>
+                        
                         <div class="form-group row mb-0">
                             <div class="col-md-6 offset-md-4">
                                 <button type="submit" class="btn btn-primary">

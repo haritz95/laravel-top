@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Sites;
 use App\Category;
 use App\Ad;
+use App\User;
 use Illuminate\Http\Request;
 use DB;
 use Carbon;
@@ -12,7 +13,10 @@ use Auth;
 use Redirect;
 use Session;
 use Validator;
+use URL;
 use App\Http\Requests\SiteStoreRequest;
+use App\Http\Requests\AdStoreRequest;
+use App\Http\Requests\VoteStoreRequest;
 
 class SitesController extends Controller
 {
@@ -20,6 +24,7 @@ class SitesController extends Controller
     public function __construct()
     {
         $this->middleware('auth', ['except' => ['index','show', 'vote', 'storeVote']]);
+        $this->middleware('banned');
     }
 
     /**
@@ -29,8 +34,9 @@ class SitesController extends Controller
      */
     public function index()
     {
-        $sites = DB::table('sites')->where('status_id', 1)->orderBy('votes','desc')->simplePaginate(15);
+        $sites = DB::table('sites')->where('status_id', 1)->orderBy('votes','desc')->simplePaginate(15)->status;
         $ads = Ad::inRandomOrder()->limit(6)->where('active', 1)->get();
+        
 
         return view('sites.index', compact('sites', 'ads'));  
     }
@@ -79,12 +85,17 @@ class SitesController extends Controller
             }
 
             /*------ THIS I WILL USE IT WHEN THE SITE IS ACTIVATED. IT WILL AUTOMATICALLY GET A RANK --------*/
-            /*$rank = DB::table('sites')->select('rank')->orderBy('votes', 'asc')->orderBy('created_at', 'asc')->where('status_id', 1)->first();
-            if(!$rank->rank){
+            //$rank = DB::table('sites')->select('rank')->orderBy('votes', 'asc')->orderBy('created_at', 'asc')->where('status_id', 1)->first();
+            /*if(!$rank['rank']){
                 $rank = 1;
             }*/
 
-            $data = DB::table('sites')
+            if(Auth::user()->end_premium < Carbon\Carbon::now()){
+                $premium = 0;
+            }else{
+                $premium = 1;
+            }
+             $data = DB::table('sites')
                     ->insert([
                         'title' => request('title'),
                         'description' => request('description'),
@@ -94,14 +105,16 @@ class SitesController extends Controller
                         'tags' => $tags,
                         'status_id' => 3,
                         'votes' => 0,
-                        //'rank' => $rank->rank+1,
+                        //'rank' => $rank[rank]+1,
+                        'premium' => $premium,
                         'user_id' => $user->id,
                         'url_file' => $url_file,
                         'created_at' => Carbon\Carbon::now(),
                         'updated_at' => Carbon\Carbon::now(),
                     ]); 
 
-             return redirect('/');       
+            return redirect()->back()->with('message', 'Site created.');      
+            
         }
         
     }
@@ -115,6 +128,7 @@ class SitesController extends Controller
     public function show($id)
     {
         $site = Sites::findOrFail($id);
+        if($site->status_id == 1 || $site->user_id == Auth::id()){
         $user = $site->user;
 
         $chartjs = app()->chartjs
@@ -147,6 +161,10 @@ class SitesController extends Controller
         ->options([]);
 
         return view('sites.view', compact('site','user','chartjs'));  
+        }
+        else{
+            return redirect()->back();
+        }
     }
 
     /**
@@ -157,11 +175,19 @@ class SitesController extends Controller
      */
     public function edit($id)
     {
-        $site = Sites::findOrFail($id);
-        $user = $site->user;
-        $categories = Category::all();
+        if(Auth::user()->admin()){
+            $site = Sites::findOrFail($id);
+            $user = $site->user;
+            $categories = Category::all();
+        }else{
+            $site = Sites::where('user_id', Auth::user()->id)->findOrFail($id);
+            $user = $site->user;
+            $categories = Category::all();
+        } 
 
-        return view('sites.edit', compact('site','user','categories'));
+        $users = User::all();
+
+        return view('sites.edit', compact('site','user','categories', 'users'));
     }
 
     /**
@@ -173,40 +199,81 @@ class SitesController extends Controller
      */
     public function update(SiteStoreRequest $request, $id)
     {
-        $site = Sites::findOrFail($id);
 
-        $user = Auth::user();
+        if(Auth::user()->admin()){
+            $site = Sites::findOrFail($id);
 
-        if(request('tags')){
-            $tags = request('tags');
-            $tags = (implode($tags,','));
+            $user = Auth::user();
+
+            $owner = $user->id;
+
+            if(request('owner') != null){
+                $owner = request('owner');
+            }
+
+            if(request('tags')){
+                $tags = request('tags');
+                $tags = (implode($tags,','));
+            }else{
+                $tags = "";
+            }
+            if($request->file('banner')){
+                $file = $request->file('banner');
+                $destinationPath = 'images/'.$user->name;
+                $file->move($destinationPath,$file->getClientOriginalName());
+                $url_file = $destinationPath.'/'.$file->getClientOriginalName();
+            }else{
+                $url_file = $site->url_file;   
+            }  
+
+            DB::table('sites')
+                ->where('id', $id)
+                ->update([
+                    'title' => request('title'),
+                    'description' => request('description'),
+                    'p_description' => request('p_description'),
+                    'category_id' => request('category'),
+                    'url' => request('website'),
+                    'url_file' => $url_file,
+                    'tags' => $tags,
+                    'user_id' => $owner,
+            ]);
+
         }else{
-            $tags = "";
+            $site = Sites::where('user_id', Auth::user()->id)->findOrFail($id);
+
+            $user = Auth::user();
+
+            if(request('tags')){
+                $tags = request('tags');
+                $tags = (implode($tags,','));
+            }else{
+                $tags = "";
+            }
+            if($request->file('banner')){
+                $file = $request->file('banner');
+                $destinationPath = 'images/'.$user->name;
+                $file->move($destinationPath,$file->getClientOriginalName());
+                $url_file = $destinationPath.'/'.$file->getClientOriginalName();
+            }else{
+                $url_file = $site->url_file;   
+            }        
+
+            DB::table('sites')
+                ->where('id', $id)
+                ->update([
+                    'title' => request('title'),
+                    'description' => request('description'),
+                    'p_description' => request('p_description'),
+                    'category_id' => request('category'),
+                    'url' => request('website'),
+                    'url_file' => $url_file,
+                    'tags' => $tags,
+            ]);
         }
-        if($request->file('banner')){
-            $file = $request->file('banner');
-            $destinationPath = 'images/'.$user->name;
-            $file->move($destinationPath,$file->getClientOriginalName());
-            $url_file = $destinationPath.'/'.$file->getClientOriginalName();
-        }else{
-            $url_file = $site->url_file;   
-        }        
+        
 
-        DB::table('sites')
-            ->where('id', $id)
-            ->update([
-                'title' => request('title'),
-                'description' => request('description'),
-                'p_description' => request('p_description'),
-                'category_id' => request('category'),
-                'url' => request('website'),
-                'url_file' => $url_file,
-                'tags' => $tags,
-        ]);
-
-        Session::flash('flash_message', 'Task successfully added!');
-
-        return redirect()->back();
+        return redirect()->back()->with('message', 'Site updated.');
     }
 
     /**
@@ -217,20 +284,34 @@ class SitesController extends Controller
      */
     public function destroy($id)
     {
-        $user = Sites::findOrFail($id);
+        if(Auth::user()->admin()){
+            $site = Sites::findOrFail($id);
 
-        $user->delete();
+            $site->delete();
 
-        return redirect()->back();
+        }else{
+            $site = Sites::where('user_id', Auth::user()->id)->findOrFail($id);
+
+            $site->delete();
+        }
+        
+
+        return redirect()->back()->with('message', 'Site deleted.');
     }
 
     public function vote($id)
     {
         $site = Sites::findOrFail($id);
-        return view('sites.vote', compact('site'));
+        if($site->status_id != 1){
+            return redirect()->back();
+        }
+        else{
+            return view('sites.vote', compact('site'));
+        }
+        
     }
 
-    public function storeVote(Request $request, $id)
+    public function storeVote(VoteStoreRequest $request, $id)
     {   
 
         if (Sites::find($id)) {
@@ -299,9 +380,20 @@ class SitesController extends Controller
         $ad_period = DB::table('table_ads_period')->get();
         $my_ads = Ad::with('spots')->where('user_id', $user->id)->get();
 
-        //dd($sites);
 
         return view('sites.dashboard', compact('sites', 'ad_spots', 'ad_period', 'my_ads'));
+    }
+
+    public function myAccount()
+    {
+        return view('account.index');
+    }
+
+    public function myAds()
+    {
+        $user = Auth::user();
+        $my_ads = Ad::with('spots')->where('user_id', $user->id)->get();
+        return view('ads.index', compact('my_ads'));
     }
 
     public function adCreate()
@@ -312,51 +404,32 @@ class SitesController extends Controller
         return view('ads.create', compact('ad_spots', 'ad_period'));
     }
 
-    public function storeAd_rules(array $data)
+    public function storeAd(AdStoreRequest $request)
     {
-      $messages = [
-        'spot.required' => 'Please select a spot',
-        'days.required' => 'Please select a plan',
-        'tiitle.required' => 'Title is required',
-        'website' => 'required|url|min:8|max:100',
-        'banner_link.required' => 'Please enter a valid url',
-      ];
+        $user = Auth::user();
+        $now = Carbon\Carbon::now();        
 
-      $validator = Validator::make($data, [
-        'spot' => 'required',
-        'days' => 'required',
-        'titlle' => 'required',
-        'website' => 'required',
-        'banner_link' => 'required',     
-      ], $messages);
-
-      return $validator;
-    }  
-
-
-    public function storeAd(Request $request)
-    {
-        $now = Carbon\Carbon::now();
-
-        $request_data = $request->All();
-        $validator = $this->storeAd_rules($request_data);
-
-        if($validator->fails())
-        {
-            return response()->json(['errors'=>$validator->getMessageBag()->all()]);
-        }else{
+            if(request('banner_link') == ""){
+                $file = $request->file('banner');
+                $destinationPath = 'images/'.$user->name;
+                $file->move($destinationPath,$file->getClientOriginalName());
+                $url_file = $destinationPath.'/'.$file->getClientOriginalName();
+                $banner = $url_file;
+            }else{
+                $banner = request('banner_link');
+            }
              $data = DB::table('ads')->insert([
                 'id_spot' => request('spot'),
+                'id_period' => request('days'),
+                'tittle' => request('tittle'),
                 'website' => request('website'),
-                'banner' => request('banner_link'),
+                'banner' => $banner,
                 'active' => 0,
-                'end_ad' => $now->addDays(request('days')),
                 'user_id' => Auth::user()->id,
                 'created_at' => $now,
                 'updated_at' => $now]);
 
-             return "Ad created.";
-        }
+             return redirect()->back()->with('message', 'Ad created.');
     }
 
     public function clickAd($id)
@@ -364,6 +437,148 @@ class SitesController extends Controller
         $ad = Ad::findorfail($id); // Find our post by ID.
         $ad->increment('clicks'); // Increment the value in the clicks column.
         $ad->update(); // Save our updated post.
+    }
+
+    public function destroyAd($id)
+    {
+        $ad = Ad::findOrFail($id);
+
+        $ad->delete();
+
+        return redirect()->back()->with('message', 'Ad deleted.');
+    }
+
+    public function editAd($id)
+    {
+        $ad = Ad::findOrFail($id);
+        $ad_spots = DB::table('table_ad_spots')->where('active', 1)->get();
+        $ad_period = DB::table('table_ads_period')->get();
+
+        return view('ads.edit', compact('ad', 'ad_spots', 'ad_period'));  
+    }
+
+    public function updateAd(Request $request, $id)
+    {
+
+        $now = Carbon\Carbon::now();
+
+            if(DB::table('ads')->select('banner')->get()){
+                $data = DB::table('ads')->where('id',$id)->update([
+                'id_spot' => request('spot'),
+                'id_period' => request('days'),
+                'tittle' => request('tittle'),
+                'website' => request('website'),
+                'updated_at' => $now]);
+            }else{
+                $data = DB::table('ads')->where('id',$id)->update([
+                'id_spot' => request('spot'),
+                'id_period' => request('days'),
+                'tittle' => request('tittle'),
+                'website' => request('website'),
+                'banner' => $banner,
+                'updated_at' => $now]);
+            }
+             return redirect()->back()->with('message', 'Ad updated.');
+    }
+
+    public function previewAd($id)
+    {
+        $sites = Sites::where('status_id', 1)->orderBy('votes','desc')->simplePaginate(15);
+        $ad = Ad::findorfail($id)->where('id', $id)->first();        
+
+        return view('ads.preview', compact('sites', 'ad')); 
+    }
+
+    public function categories(){
+        $categories = Category::all();
+        return view('admin.categories', compact('categories'));
+    }
+
+    public function createCategory(Request $request){
+
+        $category = new Category;
+        if($request->file("banner")){
+            $file = $request->file('banner');
+                $destinationPath = 'images/category/'.$request->category;
+                $file->move($destinationPath,$file->getClientOriginalName());
+                $url_file = URL::to("/").'/'.$destinationPath.'/'.$file->getClientOriginalName();
+
+        }else{
+            $url_file = $request->banner_link;
+        }
+        
+
+
+        $category->name = $request->category;
+        $category->image = $url_file;
+
+        $category->save();
+
+        return redirect()->back()->with('message', 'Category created.');
+    }
+
+    public function updateCategory(Request $request,$id)
+    {
+        $category = Category::findOrFail($id);
+
+        if($request->file("banner")){
+            $file = $request->file('banner');
+                $destinationPath = 'images/category/'.$request->category;
+                $file->move($destinationPath,$file->getClientOriginalName());
+                $url_file = URL::to("/").'/'.$destinationPath.'/'.$file->getClientOriginalName();
+        }else{
+            $url_file = $request->banner_link;
+        }
+
+        
+
+        $category->name = $request->name;
+        $category->image = $url_file;
+
+        $category->save();
+
+        return redirect()->back()->with('message', 'Category updated.');
+    }
+
+    public function destroyCategory($id)
+    {
+        $category = Category::findOrFail($id);
+
+        $category->delete();
+
+        return redirect()->back()->with('message', 'Category deleted.');
+    }
+    public function checkCategory(Request $request)
+    {
+        $category = DB::table('categories')->where('name', $request->category)->get();
+
+        if($category->count()){
+            return "ok";
+        }
+
+    }
+
+    public function premium(){
+
+        $premium = DB::table('premium_period')->get();
+
+        return view('admin.premium', compact('premium'));
+    }
+
+    public function createPremium(Request $request){
+
+        $now = Carbon\Carbon::now();
+
+        $data = DB::table('premium_period')->insert([
+                'display_name' => request('name'),
+                'days' => request('days'),
+                'price' => request('price'),
+                'discount_percentage' => request('discount'),
+                'created_at' => $now,
+                'updated_at' => $now]);
+        
+
+        return redirect()->back()->with('message', 'Plan created.');
     }
  
 }

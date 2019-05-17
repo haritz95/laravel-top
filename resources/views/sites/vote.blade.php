@@ -16,6 +16,12 @@
                 <center><h1>{{ $site->title }}</h1></center>
                 <input type="hidden" name="site_id" value="">
               </div>
+                  <center><div class="col-md-12 mb-2">
+                    {!! NoCaptcha::display() !!}
+                      @if ($errors->has('g-recaptcha-response'))
+                        <div class="error mb-2"><strong style="color: red">{{ $errors->first('g-recaptcha-response') }}</strong></div>
+                      @endif
+                  </div></center>
               <center><button type="submit" class="btn btn-primary mb-2">Vote</button></center>
             </form>
         </div>

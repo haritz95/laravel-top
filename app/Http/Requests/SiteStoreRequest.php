@@ -28,7 +28,8 @@ class SiteStoreRequest extends FormRequest
             'description' => 'required|string|min:15|max:255',
             'category' => 'required|not_in:0',
             'banner' => 'mimes:jpeg,jpg,png,gif|max:5000',
-            'website' => 'required|url|min:8|max:100'
+            'website' => 'required|url|min:8|max:100',
+            'g-recaptcha-response' => 'required|captcha',
         ];
     }
 
@@ -42,7 +43,8 @@ class SiteStoreRequest extends FormRequest
         return [
             'title.required' => 'Title is required!',
             'description.required' => 'Description is required!',
-            'category.required' => 'Category is required!'
+            'category.required' => 'Category is required!',
+            'g-recaptcha-response.required' => 'Recaptcha is required!',
         ];
     }
 }

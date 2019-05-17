@@ -29,9 +29,6 @@ class CreateSitesTable extends Migration
             $table->integer('votes')->nullable();
             $table->integer('status_id')->unsigned()->nullable();
             $table->foreign('status_id')->references('id')->on('status');
-            $table->boolean('featured')->nullable();
-            $table->boolean('premium')->nullable();
-            $table->dateTime('end_premium')->nullable();
             $table->timestamps();
         });
     }

@@ -16,6 +16,7 @@ class CreateTableAdSpots extends Migration
         Schema::create('table_ad_spots', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
+            $table->integer('price');
             $table->boolean('active');
             $table->timestamps();
         });

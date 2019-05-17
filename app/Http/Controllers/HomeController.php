@@ -34,10 +34,22 @@ class HomeController extends Controller
     public function index()
     {
 
-        $sites = DB::table('sites')->where('status_id', 1)->orderBy('votes','desc')->simplePaginate(15);
+        $sites = Sites::where('status_id', 1)->orderBy('votes','desc')->simplePaginate(15);
         $ads = Ad::inRandomOrder()->limit(6)->where('active', 1)->get();
 
+        $this->storeVisit($ads);
+
         return view('sites.index', compact('sites', 'ads'));
+    }
+
+    public function storeVisit($data)
+    {
+      foreach ($data as $ad_info) {
+        $ad = Ad::findorfail($ad_info->id); // Find our post by ID.
+        $ad->increment('views'); // Increment the value in the clicks column.
+        $ad->update(); // Save our updated post.
+      }
+       
     }
 
     public function admin_credential_rules(array $data)

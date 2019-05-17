@@ -3,23 +3,28 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.bundle.js"></script>
 <div class="container">
     <div class="row">
-        <div class="col-md-12">
-        @if(session()->has('message'))
-                <div class="alert alert-danger">
-                    <center><h3>{{ session()->get('message') }}</h3></center>
-                </div>
-            @endif
-      </div>
         <div class="col-md-8">
             <form action="{{ url('/site/store') }}" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="_token" value="{{ csrf_token() }}">
+              <div>
+                {{ Breadcrumbs::render('create_site') }}
+              </div>
+              @if(session()->has('message'))
+                <div class="alert alert-success">
+                    <center><h3>{{ session()->get('message') }}</h3></center>
+                </div>
+              @endif
               <div class="form-row">
                 <div class="form-group col-md-12">
                   <label for="category" style="font-size: 1vw">Category</label>
-                  <select id="category" class="js-example-basic-single js-states form-control" name="category" required="required" style="width: 100%" value="{{Request::old('category')}}">
+                  <select id="category" class="js-example-basic-single js-states form-control" name="category" required="required" style="width: 100%">
                     <option selected="selected" value="">Choose...</option>
                     @foreach($categories as $category)
+                    @if(old('category') == $category->id)
+                    <option selected="selected" value={{$category->id}}>{{ $category->name }}</option>
+                    @else
                     <option value={{$category->id}}>{{ $category->name }}</option>
+                    @endif
                     @endforeach
                   </select>
                     @if ($errors->has('category'))
@@ -74,13 +79,21 @@
               <div class="form-row">
                 <div class="form-group col-md-12">
                   <label for="banner" style="font-size: 1vw">Premium Banner</label>
-                    <input type="file" class="form-control-file" id="banner" name="banner">
+                    <input type="file" class="form-control-file{{ $errors->has('banner') ? ' border-fail' : '' }}" id="banner" name="banner">
                     <small id="fileHelp" class="form-text text-muted" style="font-size: 0.7vw">The file must be, JPG,JPEG,PNG or GIF. Maximun size: 5MB</small>
                     @if ($errors->has('banner'))
                         <div class="error">{{ $errors->first('banner') }}</div>
                     @endif
                 </div>
               </div>
+              <div class="form-row">
+                <div class="col-md-6 col-md-6 mb-2">
+                    {!! NoCaptcha::display() !!}
+                </div>
+            </div>
+              @if ($errors->has('g-recaptcha-response'))
+                      <div class="error mb-2"><strong style="color: red">{{ $errors->first('g-recaptcha-response') }}</strong></div>
+              @endif
               <button type="submit" class="btn btn-primary mb-2">Submit</button>
             </form>
         </div>

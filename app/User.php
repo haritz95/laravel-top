@@ -16,7 +16,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'email', 'password'
     ];
 
     /**
@@ -37,8 +37,30 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+
     public function sites()
     {
         return $this->hasMany(Sites::class);
+    }
+
+    public function ads()
+    {
+        return $this->hasMany(Ad::class);
+    }
+
+    public function role(){
+        return $this->belongsTo(Roles::class);
+    }
+
+    public function admin(){
+        return $this->role()->where('name', 'Admin')->exists();
+    }
+    
+    public function status(){
+        return $this->belongsTo(Status::class);
+    }
+
+    public function banned(){
+        return $this->status()->where('name', 'Banned')->exists();
     }
 }

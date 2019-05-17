@@ -40,10 +40,15 @@ class CheckPremium extends Command
     public function handle()
     {
         $now = Carbon\Carbon::now();
-        $sites = DB::table('sites')->where('end_premium', '<=', $now)->where('premium', 1)->get();
+        /*$sites = DB::table('sites')->where('end_premium', '<=', $now)->where('premium', 1)->get();*/
+        $users = DB::table('users')->where('end_premium', '<=', $now)->where('premium', 1)->get();
 
-        foreach ($sites as $site) {
+        /*foreach ($sites as $site) {
             DB::table('sites')->where('id', $site->id)->update(array('premium' => 0, 'end_premium' => NULL));
+        }*/
+        foreach ($users as $user) {
+            DB::table('users')->where('id', $user->id)->update(array('premium' => 0, 'end_premium' => NULL));
+            DB::table('sites')->where('user_id', $user->id)->update(array('premium' => 0, 'end_premium' => NULL));
         }
     }
 }

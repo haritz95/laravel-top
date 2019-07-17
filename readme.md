@@ -7,7 +7,7 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/license.svg" alt="License"></a>
 </p>
 
-<a href="http://sobark.com" target="blank">Demo</a>
+¨<h1><a href="http://sobark.com" target="_blank">Demo</a></h1>
 
 ## About Laravel
 
